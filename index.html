@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* (styles unchanged, same as previous) */
         :root {
             --felt-deep: #122E23;
             --felt-mid: #1F5C3D;
@@ -455,32 +456,34 @@
 
   <section>
     <div class="section-head"><h2>Cloud Sync</h2><span>wireless via npoint.io</span></div>
-    <div id="cloudSetup">
-      <p style="font-size:12px; opacity:0.8;">Create a cloud bin to sync scores across devices.</p>
-      <div class="export-row">
-        <button class="export-btn" id="createBinBtn">✨ Create New Cloud Bin</button>
-      </div>
-      <div class="setup-box" style="display:none;" id="binUrlBox">
-        <label style="font-size:10px; color:var(--paper-dim);">Your Cloud Bin URL (copy and paste into index.html on GitHub):</label>
-        <input type="text" id="binUrlInput" readonly>
-        <p style="font-size:9px; opacity:0.5;">Edit your GitHub repository, open index.html, find <code>CLOUD_BIN_URL</code>, and paste this URL there.</p>
+    <div id="cloudSetup" style="display:block;">
+      <p style="font-size:12px; opacity:0.8;">1. Go to <strong>npoint.io</strong> in a browser, paste the default JSON (below), and save to get a URL.<br>2. Paste that URL here and tap <strong>Save URL</strong>.</p>
+      <details>
+        <summary style="font-size:11px; color:var(--cloud-accent); cursor:pointer;">📋 Default JSON (copy this)</summary>
+        <textarea readonly style="width:100%; height:80px; font-family:monospace; font-size:10px; background:var(--paper); color:var(--ink); border:none; border-radius:4px; padding:6px; margin-top:6px;">{"players":{"Finlay":{"rounds":0,"points":0,"wins":0,"losses":0},"Louie":{"rounds":0,"points":0,"wins":0,"losses":0},"Riley":{"rounds":0,"points":0,"wins":0,"losses":0},"Laura":{"rounds":0,"points":0,"wins":0,"losses":0},"Keppel":{"rounds":0,"points":0,"wins":0,"losses":0}},"matches":[],"quickRound":{"players":{"Finlay":{"wins":0,"losses":0,"points":0},"Louie":{"wins":0,"losses":0,"points":0},"Riley":{"wins":0,"losses":0,"points":0},"Laura":{"wins":0,"losses":0,"points":0},"Keppel":{"wins":0,"losses":0,"points":0}},"matches":[]}}</textarea>
+      </details>
+      <div class="setup-box">
+        <label style="font-size:10px; color:var(--paper-dim);">Cloud Bin URL:</label>
+        <input type="text" id="binUrlInput" placeholder="https://api.npoint.io/abc123">
+        <button class="export-btn cloud-btn" id="saveUrlBtn" style="margin-top:8px;">💾 Save URL</button>
       </div>
     </div>
-    <div class="export-row" id="cloudActions" style="display:none;">
-      <button class="export-btn cloud-btn" id="cloudUpdateBtn">☁️ Update Cloud Now</button>
-      <button class="export-btn" id="copyStateBtn">📋 Copy State (backup)</button>
+    <div id="cloudActions" style="display:none;">
+      <div class="export-row">
+        <button class="export-btn cloud-btn" id="cloudUpdateBtn">☁️ Update Cloud Now</button>
+        <button class="export-btn" id="copyStateBtn">📋 Copy State (backup)</button>
+        <button class="export-btn" id="changeUrlBtn">🔄 Change Cloud URL</button>
+      </div>
+      <p style="font-size:10px; opacity:0.6; margin-top:6px;">Cloud is active. Tap Update to push current scores.</p>
     </div>
     <div style="font-family:'Space Mono',monospace; font-size:10px; color:var(--paper-dim); margin-top:10px; opacity:0.7;" id="shareMsg"></div>
   </section>
 </main>
 
 <script>
-// ===================== CONFIGURATION =====================
-// Paste your npoint.io bin URL here (e.g. https://api.npoint.io/abc123)
-const CLOUD_BIN_URL = '';
-
 const PLAYERS = ["Finlay","Louie","Riley","Laura","Keppel"];
 const STORAGE_KEY = "brown-family-pingpong-state";
+const URL_STORAGE_KEY = "brown-family-cloud-url";
 
 function defaultState() {
   const players = {};
@@ -505,11 +508,12 @@ function migrateState(parsed) {
 }
 
 let state = defaultState();
+let cloudUrl = localStorage.getItem(URL_STORAGE_KEY) || '';
 
 async function fetchRemoteState() {
-  if (!CLOUD_BIN_URL) return null;
+  if (!cloudUrl) return null;
   try {
-    const response = await fetch(CLOUD_BIN_URL, { cache: 'no-cache' });
+    const response = await fetch(cloudUrl, { cache: 'no-cache' });
     if (!response.ok) throw new Error('Network response not ok');
     const json = await response.json();
     if (json && json.players && json.matches && json.quickRound) {
@@ -669,6 +673,75 @@ function renderHistory() {
   }).join("");
 }
 
+// ---------- Cloud UI ----------
+function updateCloudUI() {
+  const setup = document.getElementById("cloudSetup");
+  const actions = document.getElementById("cloudActions");
+  if (cloudUrl) {
+    setup.style.display = 'none';
+    actions.style.display = 'block';
+  } else {
+    setup.style.display = 'block';
+    actions.style.display = 'none';
+  }
+}
+
+// Save the URL manually entered
+document.getElementById("saveUrlBtn").addEventListener("click", ()=>{
+  const input = document.getElementById("binUrlInput");
+  const url = input.value.trim();
+  if (!url.startsWith("https://api.npoint.io/")) {
+    document.getElementById("shareMsg").textContent = "❌ Please enter a valid npoint.io URL.";
+    return;
+  }
+  localStorage.setItem(URL_STORAGE_KEY, url);
+  cloudUrl = url;
+  updateCloudUI();
+  document.getElementById("shareMsg").textContent = "✅ Cloud URL saved!";
+  // Reload state from cloud now that URL is set
+  loadState();
+});
+
+// Change URL button
+document.getElementById("changeUrlBtn").addEventListener("click", ()=>{
+  localStorage.removeItem(URL_STORAGE_KEY);
+  cloudUrl = '';
+  updateCloudUI();
+  document.getElementById("shareMsg").textContent = "Cloud URL cleared. You can enter a new one.";
+});
+
+// Copy state
+document.getElementById("copyStateBtn").addEventListener("click", async ()=>{
+  try {
+    const json = JSON.stringify(state);
+    await navigator.clipboard.writeText(json);
+    document.getElementById("shareMsg").textContent = "✅ State copied as backup.";
+  } catch(e) {
+    document.getElementById("shareMsg").textContent = "❌ Couldn't copy.";
+  }
+});
+
+// Cloud update (PUT)
+document.getElementById("cloudUpdateBtn").addEventListener("click", async ()=>{
+  const msg = document.getElementById("shareMsg");
+  if (!cloudUrl) {
+    msg.textContent = "❌ No cloud URL saved.";
+    return;
+  }
+  msg.textContent = "☁️ Updating cloud…";
+  try {
+    const res = await fetch(cloudUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state)
+    });
+    if (!res.ok) throw new Error('Update failed with status ' + res.status);
+    msg.textContent = "✅ Cloud updated! All devices will sync on next launch.";
+  } catch(e) {
+    msg.textContent = "❌ Update failed: " + e.message;
+  }
+});
+
 // ---------- Match form ----------
 document.getElementById("matchForm").addEventListener("submit", (e)=>{
   e.preventDefault();
@@ -732,68 +805,6 @@ qrResetBtn.addEventListener("click", ()=>{
 
 document.getElementById("oddsA").addEventListener("change",renderOdds);
 document.getElementById("oddsB").addEventListener("change",renderOdds);
-
-// ---------- Cloud UI ----------
-function updateCloudUI() {
-  if (CLOUD_BIN_URL) {
-    document.getElementById("cloudSetup").style.display = 'none';
-    document.getElementById("cloudActions").style.display = 'flex';
-  } else {
-    document.getElementById("cloudSetup").style.display = 'block';
-    document.getElementById("cloudActions").style.display = 'none';
-  }
-}
-
-// Create npoint.io bin – works because origin is now https://
-document.getElementById("createBinBtn").addEventListener("click", async ()=>{
-  const msg = document.getElementById("shareMsg");
-  msg.textContent = "Creating cloud bin…";
-  try {
-    const res = await fetch('https://api.npoint.io/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(defaultState())
-    });
-    if (!res.ok) throw new Error('Creation failed');
-    const data = await res.json();
-    const binUrl = `https://api.npoint.io/${data.id}`;
-    document.getElementById("binUrlInput").value = binUrl;
-    document.getElementById("binUrlBox").style.display = 'block';
-    msg.textContent = "✅ Cloud bin created! Copy the URL above and update it in your GitHub index.html file.";
-  } catch(e) {
-    msg.textContent = "❌ Creation failed: " + e.message + " – Make sure you're viewing this page from its GitHub Pages URL (not as a local file).";
-  }
-});
-
-document.getElementById("copyStateBtn").addEventListener("click", async ()=>{
-  try {
-    const json = JSON.stringify(state);
-    await navigator.clipboard.writeText(json);
-    document.getElementById("shareMsg").textContent = "✅ State copied as backup.";
-  } catch(e) {
-    document.getElementById("shareMsg").textContent = "❌ Couldn't copy.";
-  }
-});
-
-document.getElementById("cloudUpdateBtn").addEventListener("click", async ()=>{
-  const msg = document.getElementById("shareMsg");
-  if (!CLOUD_BIN_URL) {
-    msg.textContent = "❌ No cloud URL configured. Edit your GitHub index.html and set CLOUD_BIN_URL.";
-    return;
-  }
-  msg.textContent = "☁️ Updating cloud…";
-  try {
-    const res = await fetch(CLOUD_BIN_URL, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(state)
-    });
-    if (!res.ok) throw new Error('Update failed with status ' + res.status);
-    msg.textContent = "✅ Cloud updated! All devices will see the new scores on next launch.";
-  } catch(e) {
-    msg.textContent = "❌ Update failed: " + e.message;
-  }
-});
 
 populateSelects();
 loadState();
