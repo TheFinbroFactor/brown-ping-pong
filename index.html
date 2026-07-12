@@ -7,7 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* … keep all the previous styles exactly as you have them … */
         :root {
             --felt-deep: #122E23; --felt-mid: #1F5C3D; --felt-light: #2D7A52;
             --line: #F1F5EF; --ball: #FF6B35; --ink: #0E1F17;
@@ -45,51 +44,47 @@
         .winrate-bar i { display: block; height: 100%; background: var(--felt-light); }
         .winrate-lbl { font-family: 'Space Mono', monospace; font-size: 10px; opacity: 0.6; margin-top: 4px; }
         #quick-round-section { background: rgba(255,111,53,0.04); border: 1px solid rgba(255,111,53,0.2); border-left: 5px solid var(--ball); border-radius: 8px; padding: 20px 22px 18px; margin-bottom: 52px; }
-        #quick-round-section.has-matches { border-left-color: var(--quick-accent); border-color: rgba(255,159,107,0.3); border-left-width: 5px; border-left-color: var(--quick-accent); }
+        #quick-round-section.has-matches { border-left-color: var(--quick-accent); }
         .qr-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; border-bottom: 1px solid rgba(241,245,239,0.12); padding-bottom: 10px; flex-wrap: wrap; }
         .qr-head h2 { font-family: 'Anton', sans-serif; font-weight: 400; font-size: 20px; letter-spacing: 0.03em; margin: 0; color: var(--paper); display: flex; align-items: center; gap: 8px; }
-        .qr-head h2 .qr-icon { display: inline-block; font-size: 18px; }
         .qr-head .qr-meta { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--paper-dim); opacity: 0.8; }
-        .qr-actions { display: flex; gap: 8px; flex-wrap: wrap; }
         .qr-reset-btn { background: none; border: 1px solid rgba(255,111,53,0.35); color: var(--quick-accent); font-family: 'Space Mono', monospace; font-size: 11px; padding: 7px 13px; border-radius: 4px; cursor: pointer; }
         .qr-empty { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--paper-dim); opacity: 0.7; padding: 12px 0 4px; text-align: center; }
         .qr-board { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; }
-        @media (max-width:900px) { .qr-board { grid-template-columns: repeat(2,1fr); } }
-        @media (max-width:520px) { .qr-board { grid-template-columns: 1fr; } }
         .qr-card { background: rgba(241,245,239,0.06); border: 1px solid rgba(241,245,239,0.12); border-radius: 5px; padding: 12px 14px; text-align: center; }
-        .qr-card.has-wins { background: rgba(241,245,239,0.1); border-color: rgba(241,245,239,0.2); }
-        .qr-card .qr-name { font-family: 'Anton', sans-serif; font-weight: 400; font-size: 15px; letter-spacing: 0.02em; color: var(--paper); margin-bottom: 8px; }
+        .qr-card .qr-name { font-family: 'Anton', sans-serif; font-size: 15px; color: var(--paper); margin-bottom: 8px; }
         .qr-card .qr-stats { display: flex; justify-content: center; gap: 14px; }
-        .qr-card .qr-stat { text-align: center; }
-        .qr-card .qr-stat .qr-num { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 18px; display: block; line-height: 1; color: var(--paper); }
-        .qr-card .qr-stat .qr-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.5; color: var(--paper-dim); }
-        .qr-card .qr-stat.wins .qr-num { color: var(--felt-light); }
-        .qr-card .qr-stat.losses .qr-num { color: var(--loss); }
-        .qr-card .qr-winrate { font-family: 'Space Mono', monospace; font-size: 10px; opacity: 0.55; margin-top: 6px; color: var(--paper-dim); }
+        .qr-card .qr-stat .qr-num { font-family: 'Space Mono', monospace; font-size: 18px; display: block; color: var(--paper); }
+        .qr-card .qr-stat .qr-lbl { font-size: 9px; text-transform: uppercase; opacity: 0.5; }
         .log-form { background: rgba(241,245,239,0.05); border: 1px solid rgba(241,245,239,0.15); border-radius: 8px; padding: 22px; display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px 12px; align-items: end; }
-        .field label { display: block; font-family: 'Space Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--paper-dim); margin-bottom: 6px; }
+        .field label { display: block; font-family: 'Space Mono', monospace; font-size: 11px; text-transform: uppercase; color: var(--paper-dim); margin-bottom: 6px; }
         select, input[type=number] { width: 100%; background: var(--paper); color: var(--ink); border: none; border-radius: 4px; padding: 10px 10px; font-family: 'Inter', sans-serif; font-size: 15px; }
         .vs { text-align: center; font-family: 'Anton', sans-serif; color: var(--ball); font-size: 18px; align-self: center; padding-top: 18px; }
-        button.submit { grid-column: 1/-1; background: var(--ball); color: var(--ink); border: none; font-family: 'Anton', sans-serif; font-size: 16px; letter-spacing: 0.03em; padding: 14px; border-radius: 5px; cursor: pointer; }
+        button.submit { grid-column: 1/-1; background: var(--ball); color: var(--ink); border: none; font-family: 'Anton', sans-serif; font-size: 16px; padding: 14px; border-radius: 5px; cursor: pointer; }
         .form-msg { grid-column: 1/-1; font-family: 'Space Mono', monospace; font-size: 12px; color: var(--ball); min-height: 16px; }
-        .qr-badge { grid-column: 1/-1; display: inline-flex; align-items: center; gap: 6px; font-family: 'Space Mono', monospace; font-size: 10px; color: var(--quick-accent); text-transform: uppercase; letter-spacing: 0.05em; background: rgba(255,111,53,0.08); border-radius: 3px; padding: 5px 10px; width: fit-content; }
-        .qr-badge .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--quick-accent); animation: pulse-dot 1.5s ease-in-out infinite; }
+        .qr-badge { grid-column: 1/-1; display: inline-flex; align-items: center; gap: 6px; font-family: 'Space Mono', monospace; font-size: 10px; color: var(--quick-accent); background: rgba(255,111,53,0.08); border-radius: 3px; padding: 5px 10px; width: fit-content; }
+        .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--quick-accent); animation: pulse-dot 1.5s infinite; }
         @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
         .odds-picker { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
         .odds-result { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
         .odds-card { background: var(--paper); color: var(--ink); border-radius: 6px; padding: 18px; text-align: center; }
-        .odds-card .pct { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 36px; display: block; }
+        .odds-card .name { font-family: 'Anton', sans-serif; font-size: 18px; margin-bottom: 4px; }
+        .odds-card .pct { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 36px; display: block; color: var(--felt-mid); }
+        .odds-card.favored .pct { color: var(--ball); }
+        .odds-bar-row { grid-column: 1/-1; height: 10px; border-radius: 5px; overflow: hidden; display: flex; }
+        .odds-bar-row .segA { background: var(--felt-light); }
+        .odds-bar-row .segB { background: var(--loss); }
         .h2h-note { grid-column: 1/-1; font-family: 'Space Mono', monospace; font-size: 12px; color: var(--paper-dim); text-align: center; }
         .history { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
         .history li { background: rgba(241,245,239,0.05); border: 1px solid rgba(241,245,239,0.1); border-radius: 6px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; gap: 10px; flex-wrap: wrap; }
         .history .matchup { font-weight: 600; }
         .history .win-name { color: var(--ball); }
-        .history .score, .history .date { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--paper-dim); }
+        .history .score { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--paper-dim); }
+        .history .date { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--paper-dim); opacity: 0.6; }
         .footer-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .reset-btn { background: none; border: 1px solid rgba(241,245,239,0.3); color: var(--paper-dim); font-family: 'Space Mono', monospace; font-size: 11px; padding: 8px 14px; border-radius: 4px; cursor: pointer; }
         .export-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(241,245,239,0.12); }
         .export-btn { background: none; border: 1px solid rgba(241,245,239,0.25); color: var(--paper-dim); font-family: 'Space Mono', monospace; font-size: 11px; padding: 9px 14px; border-radius: 4px; cursor: pointer; }
-        .sync-status { font-size: 10px; margin-top: 4px; opacity: 0.8; }
     </style>
 </head>
 <body>
@@ -97,7 +92,7 @@
   <div class="hero">
     <p class="eyebrow">Est. this household &middot; 5 players &middot; 1 table</p>
     <h1>BROWN FAMILY<br>PING PONG</h1>
-    <p>Every rally counts. Track rounds played, points, wins, and losses for Finlay, Louie, Riley, Laura, and Keppel.</p>
+    <p>Every rally counts. Track rounds played, points, wins, and losses.</p>
   </div>
 </div>
 
@@ -113,7 +108,7 @@
       <span class="qr-meta" id="qrMatchCount">0 matches this session</span>
       <div class="qr-actions"><button class="qr-reset-btn" id="qrResetBtn" type="button">Reset Quick Round</button></div>
     </div>
-    <div id="qrContent"><p class="qr-empty">No quick round matches yet — log a match below.</p></div>
+    <div id="qrContent"><p class="qr-empty">No quick round matches yet.</p></div>
   </section>
 
   <section>
@@ -141,21 +136,27 @@
 
   <section>
     <div class="footer-row section-head"><h2>Match History</h2><button class="reset-btn" id="resetBtn" type="button">Reset all data</button></div>
-    <ul class="history" id="history"><li class="empty">No matches yet — the table is warm and waiting.</li></ul>
+    <ul class="history" id="history"><li class="empty">No matches yet.</li></ul>
   </section>
 
   <section>
-    <div class="section-head"><h2>Cloud Sync (via URL)</h2><span>just share the link</span></div>
+    <div class="section-head"><h2>Cloud Sync</h2><span>via GitHub Gist</span></div>
     <div class="export-row">
-      <button class="export-btn" id="copyUrlBtn">🔗 Copy Syncable Link</button>
-      <button class="export-btn" id="resetUrlBtn">🔄 Start Fresh (new URL)</button>
+      <button class="export-btn" id="syncNowBtn">🔄 Sync Now</button>
+      <button class="export-btn" id="copyLinkBtn">🔗 Copy Shareable Link</button>
     </div>
-    <div class="sync-status" id="syncStatus">📎 Your scores are stored in the link. Copy and share it to sync.</div>
-    <div style="font-family:'Space Mono',monospace; font-size:10px; color:var(--paper-dim); margin-top:10px; opacity:0.7;" id="shareMsg"></div>
+    <div style="font-size:10px; opacity:0.7; margin-top:6px;" id="syncStatus">✅ Scores are stored in your Gist and synced automatically.</div>
   </section>
 </main>
 
 <script>
+// ============================================================
+// ⚠️ REPLACE THE TOKEN BELOW WITH YOUR NEW CLASSIC TOKEN (gist scope only)
+const GIST_ID = 'ecd3be4ee57b7fd373e64fa541766f35';
+const GITHUB_TOKEN = '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';   // ← PUT YOUR NEW TOKEN HERE
+// ============================================================
+
+const GIST_API = `https://api.github.com/gists/${GIST_ID}`;
 const PLAYERS = ["Finlay","Louie","Riley","Laura","Keppel"];
 
 function defaultState() {
@@ -166,44 +167,52 @@ function defaultState() {
   return { players, matches: [], quickRound: { players: qrPlayers, matches: [] } };
 }
 
-function encodeState(state) {
-  return btoa(JSON.stringify(state));
+let state = defaultState();
+
+// Fetch the latest scores from the Gist (public – no auth needed)
+async function loadState() {
+  try {
+    const res = await fetch(GIST_API);
+    if (!res.ok) throw new Error('Failed to fetch gist');
+    const gist = await res.json();
+    const file = gist.files['scores.json'];
+    if (file && file.content) {
+      const parsed = JSON.parse(file.content);
+      if (parsed.players) state = parsed;
+    }
+  } catch(e) {
+    console.warn('Could not load from Gist, using default', e);
+  }
 }
 
-function decodeState(base64) {
+// Push the current state to the Gist (requires token)
+async function pushState() {
+  const body = {
+    files: {
+      'scores.json': {
+        content: JSON.stringify(state)
+      }
+    }
+  };
   try {
-    const json = atob(base64);
-    const parsed = JSON.parse(json);
-    if (parsed && parsed.players && parsed.matches && parsed.quickRound) {
-      return parsed;
+    const res = await fetch(GIST_API, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) {
+      document.getElementById("syncStatus").textContent = '✅ Scores synced to Gist.';
+      return true;
     }
   } catch(e) {}
-  return null;
+  document.getElementById("syncStatus").textContent = '⚠️ Sync failed – will retry later.';
+  return false;
 }
 
-function loadStateFromHash() {
-  const hash = window.location.hash.substring(1); // remove '#'
-  if (hash) {
-    const decoded = decodeState(hash);
-    if (decoded) return decoded;
-  }
-  return defaultState();
-}
-
-function updateUrlWithState(state) {
-  const base64 = encodeState(state);
-  const newUrl = window.location.pathname + '#' + base64;
-  window.history.replaceState(null, '', newUrl);
-}
-
-let state = loadStateFromHash();
-
-function saveState() {
-  // No localStorage needed – the URL is the single source of truth
-  updateUrlWithState(state);
-}
-
-// ---------- UI ----------
+// ---------- UI functions ----------
 function populateSelects() {
   const a = document.getElementById("playerA");
   const b = document.getElementById("playerB");
@@ -298,7 +307,7 @@ function renderQuickRound() {
   const hasAny = PLAYERS.some(p=>qr.players[p].wins>0||qr.players[p].losses>0||qr.players[p].points>0);
   if(!hasAny){
     qrSection.classList.remove("has-matches");
-    qrContent.innerHTML = `<p class="qr-empty">No quick round matches yet — log a match below.</p>`;
+    qrContent.innerHTML = `<p class="qr-empty">No quick round matches yet.</p>`;
     return;
   }
   qrSection.classList.add("has-matches");
@@ -330,26 +339,8 @@ function renderHistory() {
   }).join("");
 }
 
-// ---------- Cloud via URL ----------
-document.getElementById("copyUrlBtn").addEventListener("click", async ()=>{
-  try {
-    const url = window.location.href;
-    await navigator.clipboard.writeText(url);
-    document.getElementById("shareMsg").textContent = "✅ Link copied! Share this URL with your family.";
-  } catch(e) {
-    document.getElementById("shareMsg").textContent = "❌ Couldn't copy. Copy the URL from the address bar.";
-  }
-});
-
-document.getElementById("resetUrlBtn").addEventListener("click", ()=>{
-  state = defaultState();
-  saveState();
-  render();
-  document.getElementById("formMsg").textContent = "Fresh scoreboard created. Share the new link.";
-});
-
-// ---------- Match form ----------
-document.getElementById("matchForm").addEventListener("submit", (e)=>{
+// ---------- Event listeners ----------
+document.getElementById("matchForm").addEventListener("submit", async (e)=>{
   e.preventDefault();
   const msg = document.getElementById("formMsg");
   const pA = document.getElementById("playerA").value;
@@ -374,46 +365,55 @@ document.getElementById("matchForm").addEventListener("submit", (e)=>{
   state.quickRound.players[loser].losses += 1;
   state.quickRound.matches.push({ date: new Date().toISOString(), p1:pA, p2:pB, winner, loser, winnerScore, loserScore });
   
-  saveState(); // updates URL hash
-  msg.textContent = `Recorded: ${winner} beat ${loser} ${winnerScore}–${loserScore}. Link updated.`;
+  msg.textContent = "Syncing…";
+  await pushState();
+  msg.textContent = `Recorded: ${winner} beat ${loser} ${winnerScore}–${loserScore}.`;
   e.target.reset();
   populateSelects();
   render();
 });
 
-// ---------- Reset buttons ----------
-const resetBtn = document.getElementById("resetBtn");
-let resetArmed=false, resetTimer=null;
-resetBtn.addEventListener("click", ()=>{
-  if(!resetArmed){
-    resetArmed=true; resetBtn.textContent="Click again to confirm wipe";
-    clearTimeout(resetTimer); resetTimer=setTimeout(()=>{ resetArmed=false; resetBtn.textContent="Reset all data"; },4000);
-    return;
-  }
-  clearTimeout(resetTimer); resetArmed=false; resetBtn.textContent="Reset all data";
-  const savedQuick = state.quickRound; state = defaultState(); state.quickRound = savedQuick;
-  saveState(); render(); document.getElementById("formMsg").textContent="Leaderboard reset. Quick Round preserved.";
+document.getElementById("resetBtn").addEventListener("click", async ()=>{
+  const savedQuick = state.quickRound;
+  state = defaultState();
+  state.quickRound = savedQuick;
+  await pushState();
+  render();
+  document.getElementById("formMsg").textContent="Leaderboard reset. Quick Round preserved.";
 });
 
-const qrResetBtn = document.getElementById("qrResetBtn");
-let qrArmed=false, qrTimer=null;
-qrResetBtn.addEventListener("click", ()=>{
-  if(!qrArmed){
-    qrArmed=true; qrResetBtn.textContent="Click again to confirm";
-    clearTimeout(qrTimer); qrTimer=setTimeout(()=>{ qrArmed=false; qrResetBtn.textContent="Reset Quick Round"; },3500);
-    return;
-  }
-  clearTimeout(qrTimer); qrArmed=false; qrResetBtn.textContent="Reset Quick Round";
+document.getElementById("qrResetBtn").addEventListener("click", async ()=>{
   const qrPlayers = {}; PLAYERS.forEach(p=>qrPlayers[p]={wins:0,losses:0,points:0});
   state.quickRound = { players:qrPlayers, matches:[] };
-  saveState(); render(); document.getElementById("formMsg").textContent="Quick Round reset. Main leaderboard untouched.";
+  await pushState();
+  render();
+  document.getElementById("formMsg").textContent="Quick Round reset.";
+});
+
+document.getElementById("syncNowBtn").addEventListener("click", async ()=>{
+  await loadState();
+  render();
+  document.getElementById("formMsg").textContent="Scores refreshed from Gist.";
+});
+
+document.getElementById("copyLinkBtn").addEventListener("click", async ()=>{
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    document.getElementById("formMsg").textContent="Link copied!";
+  } catch(e) {
+    document.getElementById("formMsg").textContent="Copy the URL from the address bar.";
+  }
 });
 
 document.getElementById("oddsA").addEventListener("change",renderOdds);
 document.getElementById("oddsB").addEventListener("change",renderOdds);
 
+// Initial load
 populateSelects();
-render();
+(async () => {
+  await loadState();
+  render();
+})();
 </script>
 </body>
 </html>
