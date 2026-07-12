@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brown Family Ping Pong</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --felt-deep: #122E23;
+            --felt-mid: #1F5C3D;
+            --felt-light: #2D7A52;
+            --line: #F1F5EF;
+            --ball: #FF6B35;
+            --ink: #0E1F17;
+            --loss: #B5555C;
+            --paper: #F1F5EF;
+            --paper-dim: #DCE6DD;
+            --quick-accent: #FF9F6B;
+            --cloud-accent: #4A9EFF;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: var(--felt-deep);
+            color: var(--paper);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+        .table-wrap {
+            position: relative;
+            background: repeating-linear-gradient(180deg,
+                    var(--felt-mid) 0px,
+                    var(--felt-mid) 3px,
+                    var(--felt-deep) 3px,
+                    var(--felt-deep) 6px),
+                var(--felt-deep);
+            border-bottom: 6px solid var(--line);
+            padding: 56px 20px 40px;
+            overflow: hidden;
+        }
+        .table-wrap::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--line);
+            opacity: 0.55;
+            transform: translateX(-50%);
+        }
+        .table-wrap::after {
+            content: "";
+            position: absolute;
+            inset: 14px;
+            border: 2px solid var(--line);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        .hero {
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+            z-index: 1;
+        }
+        .eyebrow {
+            font-family: 'Space Mono', monospace;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            font-size: 11px;
+            color: var(--ball);
+            margin: 0 0 10px;
+        }
+        h1 {
+            font-family: 'Anton', sans-serif;
+            font-weight: 400;
+            font-size: clamp(34px, 7vw, 64px);
+            line-height: 0.95;
+            letter-spacing: 0.01em;
+            margin: 0;
+            color: var(--paper);
+            text-shadow: 0 3px 0 rgba(0,0,0,0.25);
+        }
+        .hero p {
+            font-size: 14px;
+            color: var(--paper-dim);
+            max-width: 480px;
+            margin: 14px auto 0;
+        }
+        main { max-width: 1080px; margin: 0 auto; padding: 36px 20px 80px; }
+        section { margin-bottom: 52px; }
+        .section-head {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid rgba(241,245,239,0.15);
+            padding-bottom: 10px;
+        }
+        .section-head h2 {
+            font-family: 'Anton', sans-serif;
+            font-weight: 400;
+            font-size: 22px;
+            letter-spacing: 0.03em;
+            margin: 0;
+            color: var(--paper);
+        }
+        .section-head span {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            color: var(--paper-dim);
+            opacity: 0.7;
+        }
+        .board { display: grid; grid-template-columns: repeat(5,1fr); gap: 14px; }
+        @media (max-width:900px) { .board { grid-template-columns: repeat(2,1fr); } }
+        @media (max-width:520px) { .board { grid-template-columns: 1fr; } }
+        .card {
+            background: var(--paper);
+            color: var(--ink);
+            border-radius: 6px;
+            padding: 18px 16px 16px;
+            position: relative;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+            border-top: 5px solid var(--ball);
+        }
+        .card.rank-1 { border-top-color: #FFC53D; }
+        .card .rank {
+            position: absolute;
+            top: -14px;
+            right: 14px;
+            background: var(--ink);
+            color: var(--paper);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+        .card h3 {
+            font-family: 'Anton', sans-serif;
+            font-weight: 400;
+            font-size: 24px;
+            margin: 6px 0 12px;
+        }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
+        .stat { background: rgba(18,46,35,0.06); border-radius: 4px; padding: 8px 10px; }
+        .stat .num { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 20px; display: block; line-height: 1; }
+        .stat .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; }
+        .stat.wins .num { color: var(--felt-light); }
+        .stat.losses .num { color: var(--loss); }
+        .winrate-bar { margin-top: 12px; height: 6px; border-radius: 3px; background: rgba(18,46,35,0.1); overflow: hidden; }
+        .winrate-bar i { display: block; height: 100%; background: var(--felt-light); }
+        .winrate-lbl { font-family: 'Space Mono', monospace; font-size: 10px; opacity: 0.6; margin-top: 4px; }
+        #quick-round-section {
+            background: rgba(255,111,53,0.04);
+            border: 1px solid rgba(255,111,53,0.2);
+            border-left: 5px solid var(--ball);
+            border-radius: 8px;
+            padding: 20px 22px 18px;
+            margin-bottom: 52px;
+            transition: border-color 0.2s ease;
+        }
+        #quick-round-section.has-matches {
+            border-left-color: var(--quick-accent);
+            border-color: rgba(255,159,107,0.3);
+            border-left-width: 5px;
+            border-left-color: var(--quick-accent);
+        }
+        .qr-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid rgba(241,245,239,0.12);
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .qr-head h2 {
+            font-family: 'Anton', sans-serif;
+            font-weight: 400;
+            font-size: 20px;
+            letter-spacing: 0.03em;
+            margin: 0;
+            color: var(--paper);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .qr-head h2 .qr-icon { display: inline-block; font-size: 18px; }
+        .qr-head .qr-meta { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--paper-dim); opacity: 0.8; }
+        .qr-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .qr-reset-btn {
+            background: none;
+            border: 1px solid rgba(255,111,53,0.35);
+            color: var(--quick-accent);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            padding: 7px 13px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .qr-reset-btn:hover { border-color: var(--loss); color: var(--loss); }
+        .qr-empty {
+            font-family: 'Space Mono', monospace;
+            font-size: 13px;
+            color: var(--paper-dim);
+            opacity: 0.7;
+            padding: 12px 0 4px;
+            text-align: center;
+        }
+        .qr-board { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; }
+        @media (max-width:900px) { .qr-board { grid-template-columns: repeat(2,1fr); } }
+        @media (max-width:520px) { .qr-board { grid-template-columns: 1fr; } }
+        .qr-card {
+            background: rgba(241,245,239,0.06);
+            border: 1px solid rgba(241,245,239,0.12);
+            border-radius: 5px;
+            padding: 12px 14px;
+            text-align: center;
+            transition: background 0.15s ease;
+        }
+        .qr-card.has-wins { background: rgba(241,245,239,0.1); border-color: rgba(241,245,239,0.2); }
+        .qr-card .qr-name { font-family: 'Anton', sans-serif; font-weight: 400; font-size: 15px; letter-spacing: 0.02em; color: var(--paper); margin-bottom: 8px; }
+        .qr-card .qr-stats { display: flex; justify-content: center; gap: 14px; }
+        .qr-card .qr-stat { text-align: center; }
+        .qr-card .qr-stat .qr-num { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 18px; display: block; line-height: 1; color: var(--paper); }
+        .qr-card .qr-stat .qr-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.5; color: var(--paper-dim); }
+        .qr-card .qr-stat.wins .qr-num { color: var(--felt-light); }
+        .qr-card .qr-stat.losses .qr-num { color: var(--loss); }
+        .qr-card .qr-winrate { font-family: 'Space Mono', monospace; font-size: 10px; opacity: 0.55; margin-top: 6px; color: var(--paper-dim); }
+        .log-form {
+            background: rgba(241,245,239,0.05);
+            border: 1px solid rgba(241,245,239,0.15);
+            border-radius: 8px;
+            padding: 22px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 16px 12px;
+            align-items: end;
+        }
+        @media (max-width:640px) { .log-form { grid-template-columns: 1fr; } }
+        .field label {
+            display: block;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--paper-dim);
+            margin-bottom: 6px;
+        }
+        select, input[type=number] {
+            width: 100%;
+            background: var(--paper);
+            color: var(--ink);
+            border: none;
+            border-radius: 4px;
+            padding: 10px 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+        }
+        .vs {
+            text-align: center;
+            font-family: 'Anton', sans-serif;
+            color: var(--ball);
+            font-size: 18px;
+            align-self: center;
+            padding-top: 18px;
+        }
+        button.submit {
+            grid-column: 1/-1;
+            background: var(--ball);
+            color: var(--ink);
+            border: none;
+            font-family: 'Anton', sans-serif;
+            font-size: 16px;
+            letter-spacing: 0.03em;
+            padding: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform .12s ease, background .12s ease;
+        }
+        button.submit:hover { background: #FF8156; }
+        button.submit:active { transform: scale(0.98); }
+        .form-msg { grid-column: 1/-1; font-family: 'Space Mono', monospace; font-size: 12px; color: var(--ball); min-height: 16px; }
+        .qr-badge {
+            grid-column: 1/-1;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            color: var(--quick-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(255,111,53,0.08);
+            border-radius: 3px;
+            padding: 5px 10px;
+            width: fit-content;
+        }
+        .qr-badge .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--quick-accent); animation: pulse-dot 1.5s ease-in-out infinite; }
+        @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+        .odds-picker { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+        .odds-picker select { flex: 1; }
+        .vs-small { font-family: 'Anton', sans-serif; color: var(--ball); font-size: 15px; flex-shrink: 0; }
+        .odds-result { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .odds-card { background: var(--paper); color: var(--ink); border-radius: 6px; padding: 18px; text-align: center; }
+        .odds-card .name { font-family: 'Anton', sans-serif; font-size: 18px; margin-bottom: 4px; }
+        .odds-card .pct { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 36px; display: block; color: var(--felt-mid); }
+        .odds-card.favored .pct { color: var(--ball); }
+        .odds-bar-row { grid-column: 1/-1; height: 10px; border-radius: 5px; overflow: hidden; display: flex; }
+        .odds-bar-row .segA { background: var(--felt-light); }
+        .odds-bar-row .segB { background: var(--loss); }
+        .h2h-note { grid-column: 1/-1; font-family: 'Space Mono', monospace; font-size: 12px; color: var(--paper-dim); text-align: center; }
+        .history { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+        .history li {
+            background: rgba(241,245,239,0.05);
+            border: 1px solid rgba(241,245,239,0.1);
+            border-radius: 6px;
+            padding: 12px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .history .matchup { font-weight: 600; }
+        .history .win-name { color: var(--ball); }
+        .history .score { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--paper-dim); }
+        .history .date { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--paper-dim); opacity: 0.6; }
+        .empty { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--paper-dim); opacity: 0.7; padding: 16px 0; }
+        .footer-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .reset-btn {
+            background: none;
+            border: 1px solid rgba(241,245,239,0.3);
+            color: var(--paper-dim);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .reset-btn:hover { border-color: var(--loss); color: var(--loss); }
+        .loading { text-align: center; padding: 60px 20px; font-family: 'Space Mono', monospace; color: var(--paper-dim); }
+
+        .export-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(241,245,239,0.12);
+        }
+        .export-btn {
+            background: none;
+            border: 1px solid rgba(241,245,239,0.25);
+            color: var(--paper-dim);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            padding: 9px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .export-btn:hover { border-color: var(--ball); color: var(--ball); }
+        .export-btn:active { transform: scale(0.97); }
+        .cloud-btn {
+            border-color: var(--cloud-accent);
+            color: var(--cloud-accent);
+        }
+        .cloud-btn:hover { background: rgba(74,158,255,0.1); }
+        .setup-box {
+            background: rgba(74,158,255,0.08);
+            border: 1px solid rgba(74,158,255,0.3);
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .setup-box input {
+            width: 100%;
+            background: var(--paper);
+            color: var(--ink);
+            border: none;
+            border-radius: 4px;
+            padding: 8px;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+<div class="table-wrap">
+  <div class="hero">
+    <p class="eyebrow">Est. this household &middot; 5 players &middot; 1 table</p>
+    <h1>BROWN FAMILY<br>PING PONG</h1>
+    <p>Every rally counts. Track rounds played, points, wins, and losses for Finlay, Louie, Riley, Laura, and Keppel.</p>
+  </div>
+</div>
+
+<main>
+  <section id="leaderboard-section">
+    <div class="section-head">
+      <h2>Leaderboard</h2>
+      <span id="totalGamesLbl">— games played</span>
+    </div>
+    <div class="board" id="board"><div class="loading">Loading scores…</div></div>
+  </section>
+
+  <section id="quick-round-section">
+    <div class="qr-head">
+      <h2><span class="qr-icon">⚡</span> Quick Round</h2>
+      <span class="qr-meta" id="qrMatchCount">0 matches this session</span>
+      <div class="qr-actions">
+        <button class="qr-reset-btn" id="qrResetBtn" type="button">Reset Quick Round</button>
+      </div>
+    </div>
+    <div id="qrContent"><p class="qr-empty">No quick round matches yet — log a match below to start tracking this session.</p></div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Log a Match</h2><span>updates stats instantly</span></div>
+    <form class="log-form" id="matchForm">
+      <div class="qr-badge"><span class="dot"></span> Also tracking in Quick&nbsp;Round</div>
+      <div class="field"><label for="playerA">Player</label><select id="playerA" required></select></div>
+      <div class="vs">VS</div>
+      <div class="field"><label for="playerB">Player</label><select id="playerB" required></select></div>
+      <div class="field"><label for="scoreA">Points scored</label><input type="number" id="scoreA" min="0" required placeholder="e.g. 11"></div>
+      <div></div>
+      <div class="field"><label for="scoreB">Points scored</label><input type="number" id="scoreB" min="0" required placeholder="e.g. 8"></div>
+      <button type="submit" class="submit">Record match</button>
+      <div class="form-msg" id="formMsg"></div>
+    </form>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Win Odds</h2><span>predicted from results so far</span></div>
+    <div class="odds-picker">
+      <select id="oddsA"></select><span class="vs-small">VS</span><select id="oddsB"></select>
+    </div>
+    <div class="odds-result" id="oddsResult"></div>
+  </section>
+
+  <section>
+    <div class="footer-row section-head">
+      <h2>Match History</h2>
+      <button class="reset-btn" id="resetBtn" type="button">Reset all data</button>
+    </div>
+    <ul class="history" id="history"><li class="empty">No matches yet — the table is warm and waiting.</li></ul>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Cloud Sync</h2><span>wireless via npoint.io</span></div>
+    <div id="cloudSetup">
+      <p style="font-size:12px; opacity:0.8;">Create a cloud bin to sync scores across devices.</p>
+      <div class="export-row">
+        <button class="export-btn" id="createBinBtn">✨ Create New Cloud Bin</button>
+      </div>
+      <div class="setup-box" style="display:none;" id="binUrlBox">
+        <label style="font-size:10px; color:var(--paper-dim);">Your Cloud Bin URL (copy and paste into index.html on GitHub):</label>
+        <input type="text" id="binUrlInput" readonly>
+        <p style="font-size:9px; opacity:0.5;">Edit your GitHub repository, open index.html, find <code>CLOUD_BIN_URL</code>, and paste this URL there.</p>
+      </div>
+    </div>
+    <div class="export-row" id="cloudActions" style="display:none;">
+      <button class="export-btn cloud-btn" id="cloudUpdateBtn">☁️ Update Cloud Now</button>
+      <button class="export-btn" id="copyStateBtn">📋 Copy State (backup)</button>
+    </div>
+    <div style="font-family:'Space Mono',monospace; font-size:10px; color:var(--paper-dim); margin-top:10px; opacity:0.7;" id="shareMsg"></div>
+  </section>
+</main>
+
+<script>
+// ===================== CONFIGURATION =====================
+// Paste your npoint.io bin URL here (e.g. https://api.npoint.io/abc123)
+const CLOUD_BIN_URL = '';
+
+const PLAYERS = ["Finlay","Louie","Riley","Laura","Keppel"];
+const STORAGE_KEY = "brown-family-pingpong-state";
+
+function defaultState() {
+  const players = {};
+  PLAYERS.forEach(p => players[p] = { rounds:0, points:0, wins:0, losses:0 });
+  const qrPlayers = {};
+  PLAYERS.forEach(p => qrPlayers[p] = { wins:0, losses:0, points:0 });
+  return { players, matches: [], quickRound: { players: qrPlayers, matches: [] } };
+}
+
+function migrateState(parsed) {
+  PLAYERS.forEach(p => { if(!parsed.players[p]) parsed.players[p] = { rounds:0, points:0, wins:0, losses:0 }; });
+  if(!Array.isArray(parsed.matches)) parsed.matches = [];
+  if(!parsed.quickRound) {
+    const qrPlayers = {};
+    PLAYERS.forEach(p => qrPlayers[p] = { wins:0, losses:0, points:0 });
+    parsed.quickRound = { players: qrPlayers, matches: [] };
+  } else {
+    PLAYERS.forEach(p => { if(!parsed.quickRound.players[p]) parsed.quickRound.players[p] = { wins:0, losses:0, points:0 }; });
+    if(!Array.isArray(parsed.quickRound.matches)) parsed.quickRound.matches = [];
+  }
+  return parsed;
+}
+
+let state = defaultState();
+
+async function fetchRemoteState() {
+  if (!CLOUD_BIN_URL) return null;
+  try {
+    const response = await fetch(CLOUD_BIN_URL, { cache: 'no-cache' });
+    if (!response.ok) throw new Error('Network response not ok');
+    const json = await response.json();
+    if (json && json.players && json.matches && json.quickRound) {
+      return migrateState(json);
+    }
+  } catch(e) {
+    console.warn('Remote fetch failed, using local state.', e);
+  }
+  return null;
+}
+
+async function loadState() {
+  try {
+    const remoteState = await fetchRemoteState();
+    if (remoteState) {
+      state = remoteState;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } else {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) { state = migrateState(JSON.parse(raw)); }
+    }
+  } catch(e) {
+    state = defaultState();
+  }
+  render();
+  updateCloudUI();
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+// ---------- UI ----------
+function populateSelects() {
+  const a = document.getElementById("playerA");
+  const b = document.getElementById("playerB");
+  const oa = document.getElementById("oddsA");
+  const ob = document.getElementById("oddsB");
+  [a,b,oa,ob].forEach(sel => {
+    const keep = sel.value;
+    sel.innerHTML = "";
+    PLAYERS.forEach(p => { const opt = document.createElement("option"); opt.value = p; opt.textContent = p; sel.appendChild(opt); });
+    if(PLAYERS.includes(keep)) sel.value = keep;
+  });
+  if(a.selectedIndex === b.selectedIndex) b.selectedIndex = 1;
+  if(oa.selectedIndex === ob.selectedIndex) ob.selectedIndex = 1;
+}
+
+function computeOdds(a, b) {
+  const pa = state.players[a], pb = state.players[b];
+  const smoothRate = (w,l) => (w+1)/(w+l+2);
+  const overallA = smoothRate(pa.wins, pa.losses);
+  const overallB = smoothRate(pb.wins, pb.losses);
+  const overallProbA = overallA/(overallA+overallB);
+  let h2hWinsA=0, h2hWinsB=0;
+  state.matches.forEach(m => {
+    if(m.winner===a && m.loser===b) h2hWinsA++;
+    else if(m.winner===b && m.loser===a) h2hWinsB++;
+  });
+  const h2hTotal = h2hWinsA + h2hWinsB;
+  const priorWeight = 2;
+  const probA = h2hTotal ? (h2hWinsA + overallProbA*priorWeight) / (h2hTotal + priorWeight) : overallProbA;
+  return { probA, probB: 1-probA, h2hWinsA, h2hWinsB, h2hTotal };
+}
+
+function renderOdds() {
+  const a = document.getElementById("oddsA").value;
+  const b = document.getElementById("oddsB").value;
+  const result = document.getElementById("oddsResult");
+  if(!a||!b||a===b){ result.innerHTML = `<div class="h2h-note">Pick two different players.</div>`; return; }
+  const { probA, probB, h2hWinsA, h2hWinsB, h2hTotal } = computeOdds(a,b);
+  const pctA = Math.round(probA*100), pctB = 100-pctA;
+  const h2hNote = h2hTotal ? `Head-to-head so far: ${a} ${h2hWinsA} – ${h2hWinsB} ${b}` : `No head-to-head matches yet — based on each player's overall record`;
+  result.innerHTML = `
+    <div class="odds-card ${pctA>=pctB?'favored':''}"><div class="name">${a}</div><span class="pct">${pctA}%</span></div>
+    <div class="odds-card ${pctB>pctA?'favored':''}"><div class="name">${b}</div><span class="pct">${pctB}%</span></div>
+    <div class="odds-bar-row"><div class="segA" style="width:${pctA}%"></div><div class="segB" style="width:${pctB}%"></div></div>
+    <div class="h2h-note">${h2hNote}</div>`;
+}
+
+function render() {
+  renderBoard();
+  renderQuickRound();
+  renderHistory();
+  renderOdds();
+}
+
+function renderBoard() {
+  const board = document.getElementById("board");
+  const totalGames = PLAYERS.reduce((sum,name)=>sum+state.players[name].wins+state.players[name].losses,0)/2;
+  document.getElementById("totalGamesLbl").textContent = totalGames + " game" + (totalGames===1?"":"s") + " played";
+  const sorted = [...PLAYERS].sort((x,y)=>{
+    const px=state.players[x], py=state.players[y];
+    const totalX=px.wins+px.losses, totalY=py.wins+py.losses;
+    const pctX = totalX>0 ? (px.wins/totalX)*100 : -1, pctY = totalY>0 ? (py.wins/totalY)*100 : -1;
+    if(pctY!==pctX) return pctY-pctX;
+    if(py.wins!==px.wins) return py.wins-px.wins;
+    return py.points-px.points;
+  });
+  board.innerHTML = sorted.map((name,i)=>{
+    const s=state.players[name];
+    const total=s.wins+s.losses;
+    const winPct=total?Math.round((s.wins/total)*100):0;
+    return `
+      <div class="card ${i===0?'rank-1':''}">
+        <div class="rank">#${i+1}</div>
+        <h3>${name}</h3>
+        <div class="stat-grid">
+          <div class="stat"><span class="num">${s.rounds}</span><span class="lbl">Rounds</span></div>
+          <div class="stat"><span class="num">${s.points}</span><span class="lbl">Points</span></div>
+          <div class="stat wins"><span class="num">${s.wins}</span><span class="lbl">Wins</span></div>
+          <div class="stat losses"><span class="num">${s.losses}</span><span class="lbl">Losses</span></div>
+        </div>
+        <div class="winrate-bar"><i style="width:${winPct}%"></i></div>
+        <div class="winrate-lbl">${winPct}% win rate</div>
+      </div>`;
+  }).join("");
+}
+
+function renderQuickRound() {
+  const qr = state.quickRound;
+  const qrSection = document.getElementById("quick-round-section");
+  const qrContent = document.getElementById("qrContent");
+  document.getElementById("qrMatchCount").textContent = qr.matches.length + " match" + (qr.matches.length===1?"":"es") + " this session";
+  const hasAny = PLAYERS.some(p=>qr.players[p].wins>0||qr.players[p].losses>0||qr.players[p].points>0);
+  if(!hasAny){
+    qrSection.classList.remove("has-matches");
+    qrContent.innerHTML = `<p class="qr-empty">No quick round matches yet — log a match below to start tracking this session.</p>`;
+    return;
+  }
+  qrSection.classList.add("has-matches");
+  const sorted = [...PLAYERS].sort((x,y)=>{
+    if(qr.players[y].wins !== qr.players[x].wins) return qr.players[y].wins - qr.players[x].wins;
+    return qr.players[y].points - qr.players[x].points;
+  });
+  qrContent.innerHTML = `<div class="qr-board">${sorted.map(name=>{
+    const s=qr.players[name]; const total=s.wins+s.losses; const winPct=total?Math.round((s.wins/total)*100):0;
+    return `<div class="qr-card ${s.wins>0?'has-wins':''}">
+      <div class="qr-name">${name}</div>
+      <div class="qr-stats">
+        <div class="qr-stat wins"><span class="qr-num">${s.wins}</span><span class="qr-lbl">Wins</span></div>
+        <div class="qr-stat losses"><span class="qr-num">${s.losses}</span><span class="qr-lbl">Losses</span></div>
+        <div class="qr-stat"><span class="qr-num">${s.points}</span><span class="qr-lbl">Pts</span></div>
+      </div>
+      <div class="qr-winrate">${winPct}% win rate</div>
+    </div>`;
+  }).join("")}</div>`;
+}
+
+function renderHistory() {
+  const list = document.getElementById("history");
+  if(!state.matches.length){ list.innerHTML = `<li class="empty">No matches yet — the table is warm and waiting.</li>`; return; }
+  const recent = [...state.matches].reverse().slice(0,25);
+  list.innerHTML = recent.map(m=>{
+    const d = new Date(m.date);
+    return `<li><span class="matchup"><span class="win-name">${m.winner}</span> beat ${m.loser}</span><span class="score">${m.winnerScore}–${m.loserScore}</span><span class="date">${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})}</span></li>`;
+  }).join("");
+}
+
+// ---------- Match form ----------
+document.getElementById("matchForm").addEventListener("submit", (e)=>{
+  e.preventDefault();
+  const msg = document.getElementById("formMsg");
+  const pA = document.getElementById("playerA").value;
+  const pB = document.getElementById("playerB").value;
+  const sA = parseInt(document.getElementById("scoreA").value,10);
+  const sB = parseInt(document.getElementById("scoreB").value,10);
+  if(pA===pB){ msg.textContent="Pick two different players."; return; }
+  if(isNaN(sA)||isNaN(sB)){ msg.textContent="Enter a score for both players."; return; }
+  if(sA===sB){ msg.textContent="Ping pong doesn't end in a tie — adjust the score."; return; }
+  const winner = sA>sB?pA:pB, loser = sA>sB?pB:pA;
+  const winnerScore = Math.max(sA,sB), loserScore = Math.min(sA,sB);
+  state.players[pA].rounds += 1;
+  state.players[pB].rounds += 1;
+  state.players[pA].points += sA;
+  state.players[pB].points += sB;
+  state.players[winner].wins += 1;
+  state.players[loser].losses += 1;
+  state.matches.push({ date: new Date().toISOString(), p1:pA, p2:pB, winner, loser, winnerScore, loserScore });
+  state.quickRound.players[pA].points += sA;
+  state.quickRound.players[pB].points += sB;
+  state.quickRound.players[winner].wins += 1;
+  state.quickRound.players[loser].losses += 1;
+  state.quickRound.matches.push({ date: new Date().toISOString(), p1:pA, p2:pB, winner, loser, winnerScore, loserScore });
+  msg.textContent = "Saving…";
+  saveState();
+  msg.textContent = `Recorded: ${winner} beat ${loser} ${winnerScore}–${loserScore}. (Added to Quick Round too ⚡)`;
+  e.target.reset();
+  populateSelects();
+  render();
+});
+
+// ---------- Reset buttons ----------
+const resetBtn = document.getElementById("resetBtn");
+let resetArmed=false, resetTimer=null;
+resetBtn.addEventListener("click", ()=>{
+  if(!resetArmed){
+    resetArmed=true; resetBtn.textContent="Click again to confirm wipe"; resetBtn.style.borderColor="var(--loss)"; resetBtn.style.color="var(--loss)";
+    clearTimeout(resetTimer); resetTimer=setTimeout(()=>{ resetArmed=false; resetBtn.textContent="Reset all data"; resetBtn.style.borderColor=""; resetBtn.style.color=""; },4000);
+    return;
+  }
+  clearTimeout(resetTimer); resetArmed=false; resetBtn.textContent="Reset all data"; resetBtn.style.borderColor=""; resetBtn.style.color="";
+  const savedQuick = state.quickRound; state = defaultState(); state.quickRound = savedQuick;
+  saveState(); render(); document.getElementById("formMsg").textContent="";
+});
+
+const qrResetBtn = document.getElementById("qrResetBtn");
+let qrArmed=false, qrTimer=null;
+qrResetBtn.addEventListener("click", ()=>{
+  if(!qrArmed){
+    qrArmed=true; qrResetBtn.textContent="Click again to confirm"; qrResetBtn.style.borderColor="var(--loss)"; qrResetBtn.style.color="var(--loss)";
+    clearTimeout(qrTimer); qrTimer=setTimeout(()=>{ qrArmed=false; qrResetBtn.textContent="Reset Quick Round"; qrResetBtn.style.borderColor=""; qrResetBtn.style.color=""; },3500);
+    return;
+  }
+  clearTimeout(qrTimer); qrArmed=false; qrResetBtn.textContent="Reset Quick Round"; qrResetBtn.style.borderColor=""; qrResetBtn.style.color="";
+  const qrPlayers = {}; PLAYERS.forEach(p=>qrPlayers[p]={wins:0,losses:0,points:0});
+  state.quickRound = { players:qrPlayers, matches:[] };
+  saveState(); render(); document.getElementById("formMsg").textContent="Quick Round reset. Main leaderboard untouched.";
+});
+
+document.getElementById("oddsA").addEventListener("change",renderOdds);
+document.getElementById("oddsB").addEventListener("change",renderOdds);
+
+// ---------- Cloud UI ----------
+function updateCloudUI() {
+  if (CLOUD_BIN_URL) {
+    document.getElementById("cloudSetup").style.display = 'none';
+    document.getElementById("cloudActions").style.display = 'flex';
+  } else {
+    document.getElementById("cloudSetup").style.display = 'block';
+    document.getElementById("cloudActions").style.display = 'none';
+  }
+}
+
+// Create npoint.io bin – works because origin is now https://
+document.getElementById("createBinBtn").addEventListener("click", async ()=>{
+  const msg = document.getElementById("shareMsg");
+  msg.textContent = "Creating cloud bin…";
+  try {
+    const res = await fetch('https://api.npoint.io/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(defaultState())
+    });
+    if (!res.ok) throw new Error('Creation failed');
+    const data = await res.json();
+    const binUrl = `https://api.npoint.io/${data.id}`;
+    document.getElementById("binUrlInput").value = binUrl;
+    document.getElementById("binUrlBox").style.display = 'block';
+    msg.textContent = "✅ Cloud bin created! Copy the URL above and update it in your GitHub index.html file.";
+  } catch(e) {
+    msg.textContent = "❌ Creation failed: " + e.message + " – Make sure you're viewing this page from its GitHub Pages URL (not as a local file).";
+  }
+});
+
+document.getElementById("copyStateBtn").addEventListener("click", async ()=>{
+  try {
+    const json = JSON.stringify(state);
+    await navigator.clipboard.writeText(json);
+    document.getElementById("shareMsg").textContent = "✅ State copied as backup.";
+  } catch(e) {
+    document.getElementById("shareMsg").textContent = "❌ Couldn't copy.";
+  }
+});
+
+document.getElementById("cloudUpdateBtn").addEventListener("click", async ()=>{
+  const msg = document.getElementById("shareMsg");
+  if (!CLOUD_BIN_URL) {
+    msg.textContent = "❌ No cloud URL configured. Edit your GitHub index.html and set CLOUD_BIN_URL.";
+    return;
+  }
+  msg.textContent = "☁️ Updating cloud…";
+  try {
+    const res = await fetch(CLOUD_BIN_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state)
+    });
+    if (!res.ok) throw new Error('Update failed with status ' + res.status);
+    msg.textContent = "✅ Cloud updated! All devices will see the new scores on next launch.";
+  } catch(e) {
+    msg.textContent = "❌ Update failed: " + e.message;
+  }
+});
+
+populateSelects();
+loadState();
+</script>
+</body>
+</html>
