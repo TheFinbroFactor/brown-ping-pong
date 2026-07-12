@@ -459,16 +459,19 @@
   </section>
 
   <section>
-    <div class="section-head"><h2>Cloud Sync</h2><span>auto‑push &amp; manual</span></div>
+    <div class="section-head"><h2>Cloud Sync</h2><span>auto‑push to jsonblob</span></div>
     <div id="cloudSetup" style="display:block;">
-      <p style="font-size:12px; opacity:0.8;">1. Create a bin at <strong>npoint.io</strong> with the default JSON.<br>2. Paste the URL below and tap <strong>Save URL</strong>.</p>
+      <p style="font-size:12px; opacity:0.8;">
+        <strong>1.</strong> Go to <a href="https://jsonblob.com" target="_blank">jsonblob.com</a> → New Blob → paste the default JSON → Save.<br>
+        <strong>2.</strong> Copy the blob URL (e.g. https://jsonblob.com/api/jsonBlob/123…) and paste it here.
+      </p>
       <details>
         <summary style="font-size:11px; color:var(--cloud-accent); cursor:pointer;">📋 Default JSON (copy this)</summary>
         <textarea readonly style="width:100%; height:80px; font-family:monospace; font-size:10px; background:var(--paper); color:var(--ink); border:none; border-radius:4px; padding:6px; margin-top:6px;">{"players":{"Finlay":{"rounds":0,"points":0,"wins":0,"losses":0},"Louie":{"rounds":0,"points":0,"wins":0,"losses":0},"Riley":{"rounds":0,"points":0,"wins":0,"losses":0},"Laura":{"rounds":0,"points":0,"wins":0,"losses":0},"Keppel":{"rounds":0,"points":0,"wins":0,"losses":0}},"matches":[],"quickRound":{"players":{"Finlay":{"wins":0,"losses":0,"points":0},"Louie":{"wins":0,"losses":0,"points":0},"Riley":{"wins":0,"losses":0,"points":0},"Laura":{"wins":0,"losses":0,"points":0},"Keppel":{"wins":0,"losses":0,"points":0}},"matches":[]}}</textarea>
       </details>
       <div class="setup-box">
-        <label style="font-size:10px; color:var(--paper-dim);">Cloud Bin URL:</label>
-        <input type="text" id="binUrlInput" placeholder="https://api.npoint.io/abc123">
+        <label style="font-size:10px; color:var(--paper-dim);">Cloud Blob URL:</label>
+        <input type="text" id="blobUrlInput" placeholder="https://jsonblob.com/api/jsonBlob/123456789">
         <button class="export-btn cloud-btn" id="saveUrlBtn" style="margin-top:8px;">💾 Save URL</button>
       </div>
     </div>
@@ -478,7 +481,7 @@
         <button class="export-btn" id="copyStateBtn">📋 Copy State (backup)</button>
         <button class="export-btn" id="changeUrlBtn">🔄 Change Cloud URL</button>
       </div>
-      <div class="sync-status" id="syncStatus">🔄 Auto‑sync is active – scores push automatically after each match.</div>
+      <div class="sync-status" id="syncStatus">🔄 Auto‑sync active – matches are pushed automatically.</div>
     </div>
     <div style="font-family:'Space Mono',monospace; font-size:10px; color:var(--paper-dim); margin-top:10px; opacity:0.7;" id="shareMsg"></div>
   </section>
@@ -550,9 +553,9 @@ function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-// ---------- Auto cloud sync ----------
+// ---------- Auto cloud sync (jsonblob.com) ----------
 async function pushToCloud() {
-  if (!cloudUrl) return;
+  if (!cloudUrl) return false;
   try {
     const res = await fetch(cloudUrl, {
       method: 'PUT',
@@ -709,17 +712,16 @@ function updateCloudUI() {
 
 // Save the URL manually entered
 document.getElementById("saveUrlBtn").addEventListener("click", ()=>{
-  const input = document.getElementById("binUrlInput");
+  const input = document.getElementById("blobUrlInput");
   const url = input.value.trim();
-  if (!url.startsWith("https://api.npoint.io/")) {
-    document.getElementById("shareMsg").textContent = "❌ Please enter a valid npoint.io URL.";
+  if (!url.startsWith("https://jsonblob.com/api/jsonBlob/")) {
+    document.getElementById("shareMsg").textContent = "❌ Please enter a valid jsonblob.com URL.";
     return;
   }
   localStorage.setItem(URL_STORAGE_KEY, url);
   cloudUrl = url;
   updateCloudUI();
   document.getElementById("shareMsg").textContent = "✅ Cloud URL saved! Scores will sync automatically.";
-  // Reload state from cloud now that URL is set
   loadState();
 });
 
@@ -742,7 +744,7 @@ document.getElementById("copyStateBtn").addEventListener("click", async ()=>{
   }
 });
 
-// Manual force sync (also used by auto-sync display)
+// Manual force sync
 document.getElementById("cloudUpdateBtn").addEventListener("click", async ()=>{
   const msg = document.getElementById("shareMsg");
   if (!cloudUrl) {
@@ -753,8 +755,10 @@ document.getElementById("cloudUpdateBtn").addEventListener("click", async ()=>{
   const ok = await pushToCloud();
   if (ok) {
     msg.textContent = "✅ Cloud updated! All devices will see the new scores.";
+    document.getElementById("syncStatus").textContent = "✅ Last sync: just now.";
   } else {
     msg.textContent = "❌ Sync failed. Check your connection or URL.";
+    document.getElementById("syncStatus").textContent = "⚠️ Sync failed – tap Force Sync to retry.";
   }
 });
 
@@ -787,7 +791,6 @@ document.getElementById("matchForm").addEventListener("submit", async (e)=>{
   saveState();
   msg.textContent = `Recorded: ${winner} beat ${loser} ${winnerScore}–${loserScore}. Syncing…`;
   
-  // Auto push to cloud
   if (cloudUrl) {
     const ok = await pushToCloud();
     if (ok) {
@@ -795,7 +798,7 @@ document.getElementById("matchForm").addEventListener("submit", async (e)=>{
       document.getElementById("syncStatus").textContent = "✅ Last sync: just now.";
     } else {
       msg.textContent = `Recorded: ${winner} beat ${loser} ${winnerScore}–${loserScore}. ⚠️ Cloud sync failed – use Force Sync later.`;
-      document.getElementById("syncStatus").textContent = "⚠️ Auto‑sync failed – tap Force Sync.";
+      document.getElementById("syncStatus").textContent = "⚠️ Sync failed – tap Force Sync to retry.";
     }
   } else {
     msg.textContent = `Recorded: ${winner} beat ${loser} ${winnerScore}–${loserScore}. (No cloud set up – scores saved locally.)`;
@@ -818,7 +821,6 @@ resetBtn.addEventListener("click", ()=>{
   clearTimeout(resetTimer); resetArmed=false; resetBtn.textContent="Reset all data"; resetBtn.style.borderColor=""; resetBtn.style.color="";
   const savedQuick = state.quickRound; state = defaultState(); state.quickRound = savedQuick;
   saveState(); render(); document.getElementById("formMsg").textContent="";
-  // Also push reset to cloud if URL exists
   if(cloudUrl) { pushToCloud(); }
 });
 
