@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* … (all the existing CSS unchanged) … */
         :root {
             --felt-deep: #122E23;
             --felt-mid: #1F5C3D;
@@ -462,16 +463,15 @@
     <div class="section-head"><h2>Cloud Sync</h2><span>auto‑push to jsonblob</span></div>
     <div id="cloudSetup" style="display:block;">
       <p style="font-size:12px; opacity:0.8;">
-        <strong>1.</strong> Go to <a href="https://jsonblob.com" target="_blank">jsonblob.com</a> → New Blob → paste the default JSON → Save.<br>
-        <strong>2.</strong> Copy the blob URL (e.g. https://jsonblob.com/api/jsonBlob/123…) and paste it here.
+        Tap <strong>✨ Create New Cloud Board</strong> to automatically set up a shared scoreboard.<br>
+        Or paste an existing jsonblob.com URL below.
       </p>
-      <details>
-        <summary style="font-size:11px; color:var(--cloud-accent); cursor:pointer;">📋 Default JSON (copy this)</summary>
-        <textarea readonly style="width:100%; height:80px; font-family:monospace; font-size:10px; background:var(--paper); color:var(--ink); border:none; border-radius:4px; padding:6px; margin-top:6px;">{"players":{"Finlay":{"rounds":0,"points":0,"wins":0,"losses":0},"Louie":{"rounds":0,"points":0,"wins":0,"losses":0},"Riley":{"rounds":0,"points":0,"wins":0,"losses":0},"Laura":{"rounds":0,"points":0,"wins":0,"losses":0},"Keppel":{"rounds":0,"points":0,"wins":0,"losses":0}},"matches":[],"quickRound":{"players":{"Finlay":{"wins":0,"losses":0,"points":0},"Louie":{"wins":0,"losses":0,"points":0},"Riley":{"wins":0,"losses":0,"points":0},"Laura":{"wins":0,"losses":0,"points":0},"Keppel":{"wins":0,"losses":0,"points":0}},"matches":[]}}</textarea>
-      </details>
-      <div class="setup-box">
-        <label style="font-size:10px; color:var(--paper-dim);">Cloud Blob URL:</label>
-        <input type="text" id="blobUrlInput" placeholder="https://jsonblob.com/api/jsonBlob/123456789">
+      <div class="export-row">
+        <button class="export-btn cloud-btn" id="createBlobBtn">✨ Create New Cloud Board</button>
+      </div>
+      <div class="setup-box" id="manualUrlBox">
+        <label style="font-size:10px; color:var(--paper-dim);">Cloud Blob URL (jsonblob.com):</label>
+        <input type="text" id="blobUrlInput" placeholder="https://jsonblob.com/api/jsonBlob/...">
         <button class="export-btn cloud-btn" id="saveUrlBtn" style="margin-top:8px;">💾 Save URL</button>
       </div>
     </div>
@@ -553,7 +553,6 @@ function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-// ---------- Auto cloud sync (jsonblob.com) ----------
 async function pushToCloud() {
   if (!cloudUrl) return false;
   try {
@@ -704,18 +703,44 @@ function updateCloudUI() {
   if (cloudUrl) {
     setup.style.display = 'none';
     actions.style.display = 'block';
+    document.getElementById("syncStatus").textContent = '🔄 Auto‑sync active – matches are pushed automatically.';
   } else {
     setup.style.display = 'block';
     actions.style.display = 'none';
   }
 }
 
-// Save the URL manually entered
+// Auto‑create blob
+document.getElementById("createBlobBtn").addEventListener("click", async ()=>{
+  const msg = document.getElementById("shareMsg");
+  msg.textContent = "Creating cloud board…";
+  try {
+    const res = await fetch("https://jsonblob.com/api/jsonBlob", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(defaultState())
+    });
+    if (!res.ok) throw new Error("Creation failed");
+    const blobUrl = res.headers.get("Location");
+    if (!blobUrl) throw new Error("No URL returned");
+    // Save the URL
+    localStorage.setItem(URL_STORAGE_KEY, blobUrl);
+    cloudUrl = blobUrl;
+    updateCloudUI();
+    msg.textContent = "✅ Cloud board created! Scores will sync automatically.";
+    // Load any existing state (should be empty, but just in case)
+    loadState();
+  } catch(e) {
+    msg.textContent = "❌ Creation failed: " + e.message;
+  }
+});
+
+// Save manually entered URL (any HTTPS URL accepted)
 document.getElementById("saveUrlBtn").addEventListener("click", ()=>{
   const input = document.getElementById("blobUrlInput");
   const url = input.value.trim();
-  if (!url.startsWith("https://jsonblob.com/api/jsonBlob/")) {
-    document.getElementById("shareMsg").textContent = "❌ Please enter a valid jsonblob.com URL.";
+  if (!url.startsWith("https://")) {
+    document.getElementById("shareMsg").textContent = "❌ Please enter a valid HTTPS URL.";
     return;
   }
   localStorage.setItem(URL_STORAGE_KEY, url);
@@ -725,7 +750,7 @@ document.getElementById("saveUrlBtn").addEventListener("click", ()=>{
   loadState();
 });
 
-// Change URL button
+// Change URL
 document.getElementById("changeUrlBtn").addEventListener("click", ()=>{
   localStorage.removeItem(URL_STORAGE_KEY);
   cloudUrl = '';
